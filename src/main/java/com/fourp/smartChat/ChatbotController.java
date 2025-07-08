@@ -1,0 +1,29 @@
+package com.fourp.smartChat;
+
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/chat")
+public class ChatbotController {
+
+    private final OpenAIClient openAIClient;
+    private final WeaviateRestClient weaviateClient;
+
+    public ChatbotController(OpenAIClient openAIClient, WeaviateRestClient weaviateClient) {
+        this.openAIClient = openAIClient;
+        this.weaviateClient = weaviateClient;
+    }
+
+    @PostMapping("/ask")
+    public Map<String, String> ask(@RequestBody Map<String, String> request) throws Exception{
+        String question = request.get("question");
+        double[] embedding = openAIClient.getEmbedding(question);
+        List<String> answers = weaviateClient.querySimilarAnswers(embedding);
+        String friendlyAnswer = openAIClient.getChatCompletion(question, answers);
+        return Map.of("question", question, "answer", friendlyAnswer);
+        
+    }
+}
