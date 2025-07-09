@@ -4,3 +4,8 @@ target/
 .idea/
 *.iml
 .DS_Store
+.classpath
+.project
+.settings/
+src/main/resources/application.properties
+

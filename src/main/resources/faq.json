@@ -1,14 +1,182 @@
 [
   {
+    "id": "peachstate_faq_001",
     "question": "What are your working hours?",
-    "answer": "We operate from 8 AM to 6 PM, Monday through Saturday."
+    "answer": "We operate Monday through Saturday, from 8 AM to 6 PM. We also offer 24/7 emergency services",
+    "client_id": "peachstate"
   },
   {
-    "question": "Do you install EV chargers?",
-    "answer": "Yes, we install Level 2 EV chargers for homes and businesses."
+    "id": "peachstate_faq_002",
+    "question": "Are you licensed and insured in Georgia?",
+    "answer": "Yes, Peach State Electric is fully licensed and insured to operate in the state of Georgia.",
+    "client_id": "peachstate"
   },
   {
-    "question": "Do you offer emergency electrical services?",
-    "answer": "Yes, we provide 24/7 emergency services for urgent electrical issues."
+    "id": "peachstate_faq_003",
+    "question": "Do you provide free estimates?",
+    "answer": "Yes, we offer free estimates for all residential and light commercial jobs in the Atlanta area.",
+    "client_id": "peachstate"
+  },
+  {
+    "id": "peachstate_faq_004",
+    "question": "What areas of Atlanta do you serve?",
+    "answer": "We serve all neighborhoods within the Atlanta metro area, including Buckhead, Decatur, Midtown, Sandy Springs, and more.",
+    "client_id": "peachstate"
+  },
+  {
+    "id": "peachstate_faq_005",
+    "question": "Do you handle emergency electrical services?",
+    "answer": "Yes, we offer 24/7 emergency services for urgent electrical issues such as outages, burning smells, or sparking outlets.",
+    "client_id": "peachstate"
+  },
+  {
+    "id": "peachstate_faq_006",
+    "question": "Can you install EV chargers at my home?",
+    "answer": "Yes, we install Level 2 home EV chargers and can help assess your panel capacity and provide a quote.",
+    "client_id": "peachstate"
+  },
+  {
+    "id": "peachstate_faq_007",
+    "question": "Do you install ceiling fans?",
+    "answer": "Absolutely. We install all major ceiling fan brands and can run new wiring if needed.",
+    "client_id": "peachstate"
+  },
+  {
+    "id": "peachstate_faq_008",
+    "question": "What forms of payment do you accept?",
+    "answer": "We accept credit cards, checks, and digital payments such as Zelle and Apple Pay.",
+    "client_id": "peachstate"
+  },
+  {
+    "id": "peachstate_faq_009",
+    "question": "How long does a typical service call take?",
+    "answer": "Most service visits take between 1 to 3 hours depending on the complexity of the job.",
+    "client_id": "peachstate"
+  },
+  {
+    "id": "peachstate_faq_010",
+    "question": "Can you help with a full home rewiring project?",
+    "answer": "Yes, we specialize in home rewiring for older Atlanta homes, including knob-and-tube and aluminum wire upgrades.",
+    "client_id": "peachstate"
+  },
+  {
+    "id": "peachstate_faq_011",
+    "question": "Do you install smart switches and outlets?",
+    "answer": "Yes, we install smart switches, outlets, and lighting systems compatible with Alexa and Google Home.",
+    "client_id": "peachstate"
+  },
+  {
+    "id": "peachstate_faq_012",
+    "question": "Do you work on rental or investment properties?",
+    "answer": "Yes, we work with many Atlanta landlords and property managers for maintenance and code compliance.",
+    "client_id": "peachstate"
+  },
+  {
+    "id": "peachstate_faq_013",
+    "question": "Can you upgrade my electrical panel?",
+    "answer": "Yes, we offer panel upgrades to 200 amps and include surge protection if requested.",
+    "client_id": "peachstate"
+  },
+  {
+    "id": "peachstate_faq_014",
+    "question": "Do you pull permits for electrical work?",
+    "answer": "Yes, we handle all required permits and inspections for permitted jobs in Atlanta and surrounding counties.",
+    "client_id": "peachstate"
+  },
+  {
+    "id": "peachstate_faq_015",
+    "question": "How do I schedule a service appointment?",
+    "answer": "You can call us at (404) 555-1212 or book online at peachstateelectric.com.",
+    "client_id": "peachstate"
+  },
+  {
+    "id": "peachstate_faq_016",
+    "question": "Are your electricians background checked?",
+    "answer": "Yes, all our technicians are background checked and drug tested.",
+    "client_id": "peachstate"
+  },
+  {
+    "id": "peachstate_faq_017",
+    "question": "Can you troubleshoot flickering lights?",
+    "answer": "Yes, we diagnose and fix common issues like flickering lights, overloaded circuits, and loose connections.",
+    "client_id": "peachstate"
+  },
+  {
+    "id": "peachstate_faq_018",
+    "question": "What types of lighting installation do you offer?",
+    "answer": "We install recessed lighting, under-cabinet lighting, outdoor landscape lights, and more.",
+    "client_id": "peachstate"
+  },
+  {
+    "id": "peachstate_faq_019",
+    "question": "Do you offer warranties?",
+    "answer": "Yes, we offer a 1-year warranty on all labor and manufacturer warranty on materials.",
+    "client_id": "peachstate"
+  },
+  {
+    "id": "peachstate_faq_020",
+    "question": "Can you install whole-house surge protection?",
+    "answer": "Yes, we install whole-home surge protectors to protect your electronics and appliances.",
+    "client_id": "peachstate"
+  },
+  {
+    "id": "peachstate_faq_021",
+    "question": "Do you service commercial properties?",
+    "answer": "Yes, we handle small business locations, retail shops, and office wiring in Atlanta.",
+    "client_id": "peachstate"
+  },
+  {
+    "id": "peachstate_faq_022",
+    "question": "Do you offer same-day service?",
+    "answer": "We try to accommodate same-day service for urgent repairs when availability allows.",
+    "client_id": "peachstate"
+  },
+  {
+    "id": "peachstate_faq_023",
+    "question": "Can you add new circuits or outlets?",
+    "answer": "Yes, we can add outlets, circuits, and GFCIs where needed, including kitchens and garages.",
+    "client_id": "peachstate"
+  },
+  {
+    "id": "peachstate_faq_024",
+    "question": "Are you familiar with Atlanta code requirements?",
+    "answer": "Yes, we stay current on Atlanta and Georgia electrical codes for all our work.",
+    "client_id": "peachstate"
+  },
+  {
+    "id": "peachstate_faq_025",
+    "question": "Do you charge a trip fee?",
+    "answer": "No, we do not charge a trip fee within our standard service areas in Atlanta.",
+    "client_id": "peachstate"
+  },
+  {
+    "id": "peachstate_faq_026",
+    "question": "Can I text you to schedule?",
+    "answer": "Yes, you can text us at (404) 555-1212 to book or ask a quick question.",
+    "client_id": "peachstate"
+  },
+  {
+    "id": "peachstate_faq_027",
+    "question": "Do you offer any financing?",
+    "answer": "We offer financing options through Wisetack for projects over $500.",
+    "client_id": "peachstate"
+  },
+  {
+    "id": "peachstate_faq_028",
+    "question": "Can you help me with electrical inspections before buying a home?",
+    "answer": "Yes, we offer pre-purchase electrical inspections for Atlanta homebuyers.",
+    "client_id": "peachstate"
+  },
+  {
+    "id": "peachstate_faq_029",
+    "question": "Do you install backup generators?",
+    "answer": "Yes, we install Generac and Briggs & Stratton standby generators and handle permitting and installation.",
+    "client_id": "peachstate"
+  },
+  {
+    "id": "peachstate_faq_030",
+    "question": "How soon can you start?",
+    "answer": "We usually have openings within 1–3 business days, depending on current demand.",
+    "client_id": "peachstate"
   }
 ]

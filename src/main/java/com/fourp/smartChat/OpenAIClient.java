@@ -1,9 +1,13 @@
 package com.fourp.smartChat;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -12,18 +16,32 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.annotation.PostConstruct;
+
 @Service
 public class OpenAIClient {
-    private final HttpClient client;
-    private final ObjectMapper mapper;
-    
+
+    private final HttpClient client = HttpClient.newHttpClient();
+    private final ObjectMapper mapper = new ObjectMapper();
+
     @Value("${openai.api.key}")
     private String openAiKey;
-    
 
-    public OpenAIClient() {
-        this.client = HttpClient.newHttpClient();
-        this.mapper = new ObjectMapper();
+    @Value("${openai.prompt.faqResponse}")
+    private String faqResponsePrompt;
+
+    @Value("${openai.prompt.templatePath}")
+    private String promptTemplatePath;
+
+    private String requestTemplate;
+
+    @PostConstruct
+    private void loadPromptTemplate() throws IOException {
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(promptTemplatePath);
+        if (inputStream == null) {
+            throw new FileNotFoundException("Prompt template not found: " + promptTemplatePath);
+        }
+        requestTemplate = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
     }
 
     public double[] getEmbedding(String input) {
@@ -38,8 +56,7 @@ public class OpenAIClient {
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            JsonNode json = mapper.readTree(response.body());
-            JsonNode vectorNode = json.get("data").get(0).get("embedding");
+            JsonNode vectorNode = mapper.readTree(response.body()).get("data").get(0).get("embedding");
 
             double[] vector = new double[vectorNode.size()];
             for (int i = 0; i < vectorNode.size(); i++) {
@@ -57,40 +74,17 @@ public class OpenAIClient {
             context.append("- ").append(ans).append("\n");
         }
 
-        String prompt = String.format(
-            "A potential customer asked: \"%s\"\n\n" +
-            "Here are relevant FAQ answers:\n%s\n\n" +
-            "Use only the information in these answers to craft a direct, friendly, and relevant reply to the customer. Do not make up new information. Respond clearly and concisely.",
-            userQuestion, context.toString()
-        );
-
-        String safePrompt = mapper.writeValueAsString(prompt);
-
-        String requestBody =
-            "{\n" +
-            "  \"model\": \"gpt-3.5-turbo\",\n" +
-            "  \"messages\": [\n" +
-            "    {\n" +
-            "      \"role\": \"system\",\n" +
-            "      \"content\": \"You are a helpful assistant for a home services business answering customer questions based on FAQs.\"\n" +
-            "    },\n" +
-            "    {\n" +
-            "      \"role\": \"user\",\n" +
-            "      \"content\": " + safePrompt + "\n" +
-            "    }\n" +
-            "  ],\n" +
-            "  \"temperature\": 0.7\n" +
-            "}";
+        String formattedPrompt = String.format(faqResponsePrompt, userQuestion, context);
+        String filledTemplate = requestTemplate.replace("{{PROMPT}}", mapper.writeValueAsString(formattedPrompt));
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create("https://api.openai.com/v1/chat/completions"))
                 .header("Authorization", "Bearer " + openAiKey)
                 .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .POST(HttpRequest.BodyPublishers.ofString(filledTemplate))
                 .build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        JsonNode root = mapper.readTree(response.body());
-        return root.at("/choices/0/message/content").asText();
+        return mapper.readTree(response.body()).at("/choices/0/message/content").asText();
     }
 }
