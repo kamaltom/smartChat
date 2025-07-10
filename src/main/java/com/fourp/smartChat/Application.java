@@ -12,7 +12,7 @@ public class Application {
         var context = SpringApplication.run(Application.class, args);
 
         //seedFAQs(context);
-        seedFeatures(context);
+        //seedFeatures(context);
         
     
     }

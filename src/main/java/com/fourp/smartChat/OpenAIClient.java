@@ -68,14 +68,24 @@ public class OpenAIClient {
         }
     }
 
-    public String getChatCompletion(String userQuestion, List<String> answers) throws Exception {
+    public String getChatCompletion(String userQuestion, List<String> answers, List<String> features) throws Exception {
+        // Build context string
         StringBuilder context = new StringBuilder();
         for (String ans : answers) {
             context.append("- ").append(ans).append("\n");
         }
 
-        String formattedPrompt = String.format(faqResponsePrompt, userQuestion, context);
-        String filledTemplate = requestTemplate.replace("{{PROMPT}}", mapper.writeValueAsString(formattedPrompt));
+        if (!features.isEmpty()) {
+            context.append("\nFeatures:\n");
+            for (String feature : features) {
+                context.append("- ").append(feature).append("\n");
+            }
+        }
+
+        String finalPrompt = String.format(faqResponsePrompt, userQuestion, context.toString());
+
+        // Replace {{PROMPT}} with actual prompt (unescaped)
+        String filledTemplate = requestTemplate.replace("\"{{PROMPT}}\"", mapper.writeValueAsString(finalPrompt));
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create("https://api.openai.com/v1/chat/completions"))
@@ -85,6 +95,42 @@ public class OpenAIClient {
                 .build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 200) {
+            throw new RuntimeException("OpenAI API error: " + response.body());
+        }
+
         return mapper.readTree(response.body()).at("/choices/0/message/content").asText();
     }
+
+
+    
+    public String detectIntentTag(String userQuestion, List<String> allowedTags) throws Exception {
+        String systemMessage = "You are a classifier. Your job is to map user questions to one intent tag from the following list:\n" +
+                String.join(", ", allowedTags) + "\n\n" +
+                "Pick the tag that best describes the underlying customer concern or priority. Only respond with one of the allowed tags exactly.";
+
+        String requestJson = "{\n" +
+                "  \"model\": \"gpt-3.5-turbo\",\n" +
+                "  \"messages\": [\n" +
+                "    { \"role\": \"system\", \"content\": " + mapper.writeValueAsString(systemMessage) + " },\n" +
+                "    { \"role\": \"user\", \"content\": " + mapper.writeValueAsString(userQuestion) + " }\n" +
+                "  ],\n" +
+                "  \"temperature\": 0.0\n" +
+                "}";
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://api.openai.com/v1/chat/completions"))
+                .header("Authorization", "Bearer " + openAiKey)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(requestJson))
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        String tag = mapper.readTree(response.body()).at("/choices/0/message/content").asText();
+
+        // Return lowercase tag for consistency
+        return tag.trim().toLowerCase();
+    }
+
 }

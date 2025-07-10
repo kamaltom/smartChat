@@ -54,5 +54,46 @@ public class WeaviateRestClient {
             throw new RuntimeException("Weaviate query failed", e);
         }
     }
+    
+    public List<String> getFeaturesByTag(String tag, String clientId) {
+        try {
+            String graphqlQuery = "{"
+                    + "\"query\": \"{ Get { Feature(where: {"
+                    + "  path: [\\\"tags\\\"],"
+                    + "  operator: Equal,"
+                    + "  valueString: \\\"" + tag + "\\\""
+                    + "},"
+                    + " limit: 5) { name description client_id tags } } }\""
+                    + "}";
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(WEAVIATE_URL))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(graphqlQuery))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            JsonNode root = mapper.readTree(response.body());
+            JsonNode features = root.at("/data/Get/Feature");
+
+            List<String> results = new ArrayList<>();
+            if (features.isArray()) {
+                for (JsonNode node : features) {
+                    String featureClientId = node.get("client_id").asText();
+                    if (clientId.equals(featureClientId)) {
+                        String name = node.get("name").asText();
+                        String description = node.get("description").asText();
+                        results.add(name + ": " + description);
+                    }
+                }
+            }
+
+            return results.isEmpty() ? List.of("No matching features found.") : results;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to query Weaviate for features by tag", e);
+        }
+    }
+
 
 }
