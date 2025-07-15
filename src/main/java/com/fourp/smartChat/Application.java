@@ -13,6 +13,7 @@ public class Application {
 
         //seedFAQs(context);
         //seedFeatures(context);
+       // seedEstimates(context);
         
     
     }
@@ -29,5 +30,12 @@ public class Application {
         System.out.println("📄 Seeding features");
         seeder.seedFeatures();
         System.out.println("✅ Features seeding complete.");
+    }
+    
+    private static void seedEstimates(ConfigurableApplicationContext context) throws Exception{
+        FaqSeeder seeder = context.getBean(FaqSeeder.class);
+        System.out.println("📄 Seeding Estimates");
+        seeder.seedEstimates();
+        System.out.println("✅ Estimates seeding complete.");
     }
 }

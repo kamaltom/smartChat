@@ -106,6 +106,62 @@ public class FaqSeeder {
 	    }
 	}
 
+	public void seedEstimates() throws Exception {
+	    InputStream inputStream = getClass().getClassLoader().getResourceAsStream("estimates.json");
+	    JsonNode root = mapper.readTree(inputStream);
+
+	    for (JsonNode node : root) {
+	        String externalId = node.get("id").asText();
+	        String category = node.get("category").asText();
+	        String item = node.get("item").asText();
+	        String description = node.get("description").asText();
+	        int costMin = node.get("cost_min").asInt();
+	        int costMax = node.get("cost_max").asInt();
+	        String unit = node.get("unit").asText();
+	        String timeframe = node.get("timeframe").asText();
+
+	        // Create searchable text for embedding
+	        String searchableText = category + " " + item + " " + description;
+	        double[] vector = openAIClient.getEmbedding(searchableText);
+	        UUID stableId = UUID.nameUUIDFromBytes(externalId.getBytes(StandardCharsets.UTF_8));
+
+	        StringBuilder vectorArray = new StringBuilder();
+	        for (double v : vector) {
+	            if (vectorArray.length() > 0) vectorArray.append(",");
+	            vectorArray.append(v);
+	        }
+
+	        // Format factors array
+	        StringBuilder factorsArray = new StringBuilder();
+	        JsonNode factorsNode = node.get("factors");
+	        if (factorsNode != null && factorsNode.isArray()) {
+	            for (int i = 0; i < factorsNode.size(); i++) {
+	                if (i > 0) factorsArray.append(",");
+	                factorsArray.append("\"").append(escapeJson(factorsNode.get(i).asText())).append("\"");
+	            }
+	        }
+
+	        String jsonBody = "{"
+	                + "\"id\": \"" + stableId + "\","
+	                + "\"class\": \"Estimate\","
+	                + "\"properties\": {"
+	                + "\"external_id\": \"" + externalId + "\","
+	                + "\"category\": \"" + escapeJson(category) + "\","
+	                + "\"item\": \"" + escapeJson(item) + "\","
+	                + "\"description\": \"" + escapeJson(description) + "\","
+	                + "\"cost_min\": " + costMin + ","
+	                + "\"cost_max\": " + costMax + ","
+	                + "\"unit\": \"" + escapeJson(unit) + "\","
+	                + "\"timeframe\": \"" + escapeJson(timeframe) + "\","
+	                + "\"factors\": [" + factorsArray + "]"
+	                + "},"
+	                + "\"vector\": [" + vectorArray + "]"
+	                + "}";
+
+	        uploadToWeaviate("Estimate", stableId.toString(), jsonBody);
+	    }
+	}
+
 
 
 	private void uploadToWeaviate(String className, String id, String jsonBody) throws Exception {

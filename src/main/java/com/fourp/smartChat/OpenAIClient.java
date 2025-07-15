@@ -103,6 +103,27 @@ public class OpenAIClient {
         return mapper.readTree(response.body()).at("/choices/0/message/content").asText();
     }
 
+    // Enhanced method with custom prompt
+    public String getChatCompletion(String userQuestion, List<String> answers, List<String> features, String customPrompt) throws Exception {
+        // Replace {{PROMPT}} with custom prompt (unescaped)
+        String filledTemplate = requestTemplate.replace("\"{{PROMPT}}\"", mapper.writeValueAsString(customPrompt));
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://api.openai.com/v1/chat/completions"))
+                .header("Authorization", "Bearer " + openAiKey)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(filledTemplate))
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 200) {
+            throw new RuntimeException("OpenAI API error: " + response.body());
+        }
+
+        return mapper.readTree(response.body()).at("/choices/0/message/content").asText();
+    }
+
 
     
     public String detectIntentTag(String userQuestion, List<String> allowedTags) throws Exception {

@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Chat Demo - AI-Powered Customer Support</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: opacity 0.3s;
+        }
+
+        .nav-links a:hover {
+            opacity: 0.8;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .cta-button {
+            background: #ff6b6b;
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
+        }
+
+        .features {
+            background: white;
+            padding: 4rem 0;
+        }
+
+        .features h2 {
+            text-align: center;
+            margin-bottom: 3rem;
+            font-size: 2.5rem;
+            color: #333;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .demo-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 4rem 0;
+            text-align: center;
+            color: white;
+        }
+
+        .demo-section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .demo-section p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .chat-demo {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            max-width: 600px;
+            margin: 2rem auto;
+            color: #333;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-demo h3 {
+            margin-bottom: 1rem;
+            color: #007bff;
+        }
+
+        .sample-messages {
+            text-align: left;
+            space-y: 1rem;
+        }
+
+        .sample-message {
+            margin-bottom: 1rem;
+            padding: 0.5rem 0;
+        }
+
+        .sample-message.user {
+            text-align: right;
+            color: #007bff;
+        }
+
+        .sample-message.bot {
+            text-align: left;
+            color: #666;
+        }
+
+        .integration {
+            background: white;
+            padding: 4rem 0;
+        }
+
+        .integration h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+            color: #333;
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+        }
+
+        .code-block pre {
+            margin: 0;
+        }
+
+        footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <div class="logo">Smart Chat</div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#demo">Demo</a></li>
+                <li><a href="#integration">Integration</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="home" class="hero">
+            <div class="container">
+                <h1>Smart Chat Widget</h1>
+                <p>Embed an AI-powered chatbot in any website with just a few lines of code</p>
+                <a href="#demo" class="cta-button">Try the Demo</a>
+            </div>
+        </section>
+
+        <section id="features" class="features">
+            <div class="container">
+                <h2>Why Choose Smart Chat?</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🤖</div>
+                        <h3>AI-Powered</h3>
+                        <p>Advanced natural language processing to understand and respond to customer queries intelligently.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h3>Easy Integration</h3>
+                        <p>Embed in any website with a single script tag. No complex setup or dependencies required.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🎨</div>
+                        <h3>Customizable</h3>
+                        <p>Match your brand with customizable themes, colors, and positioning options.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📱</div>
+                        <h3>Mobile Friendly</h3>
+                        <p>Responsive design that works perfectly on desktop, tablet, and mobile devices.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔒</div>
+                        <h3>Secure</h3>
+                        <p>Enterprise-grade security with data encryption and privacy protection.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3>Analytics Ready</h3>
+                        <p>Built-in analytics to track conversation metrics and user engagement.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="demo" class="demo-section">
+            <div class="container">
+                <h2>See It In Action</h2>
+                <p>Click the chat button in the bottom-right corner to start a conversation!</p>
+                <div class="chat-demo">
+                    <h3>Sample Conversation</h3>
+                    <div class="sample-messages">
+                        <div class="sample-message user">
+                            <strong>You:</strong> What are your business hours?
+                        </div>
+                        <div class="sample-message bot">
+                            <strong>Smart Chat:</strong> Our business hours are Monday through Friday, 9 AM to 6 PM EST. We're here to help you with any questions you might have!
+                        </div>
+                        <div class="sample-message user">
+                            <strong>You:</strong> Do you offer technical support?
+                        </div>
+                        <div class="sample-message bot">
+                            <strong>Smart Chat:</strong> Yes! We provide comprehensive technical support through multiple channels. You can reach our technical team via this chat, email, or phone during business hours.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="integration" class="integration">
+            <div class="container">
+                <h2>Easy Integration</h2>
+                <p>Add Smart Chat to your website in under 2 minutes:</p>
+                
+                <h3>Option 1: Auto-initialization with script tag</h3>
+                <div class="code-block">
+                    <pre><code>&lt;script src="/chatbot-widget.js" 
+        data-auto-init="true"
+        data-title="Your Chat Assistant"
+        data-position="bottom-right"
+        data-api-url="/api/chat/ask"&gt;&lt;/script&gt;</code></pre>
+                </div>
+
+                <h3>Option 2: Manual initialization with JavaScript</h3>
+                <div class="code-block">
+                    <pre><code>&lt;script src="/chatbot-widget.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+    const chatbot = new ChatbotWidget({
+        title: 'Your Chat Assistant',
+        position: 'bottom-right',
+        apiUrl: '/api/chat/ask',
+        placeholder: 'Ask me anything...'
+    });
+&lt;/script&gt;</code></pre>
+                </div>
+
+                <h3>Configuration Options</h3>
+                <div class="code-block">
+                    <pre><code>{
+    apiUrl: '/api/chat/ask',      // Your chatbot API endpoint
+    title: 'Smart Chat',          // Widget title
+    position: 'bottom-right',     // 'bottom-right' or 'bottom-left'
+    placeholder: 'Type here...',  // Input placeholder text
+    theme: 'light'                // Theme (future feature)
+}</code></pre>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Smart Chat. Built with ❤️ for better customer experiences.</p>
+        </div>
+    </footer>
+
+    <!-- Chatbot Widget Integration -->
+    <script src="/chatbot-widget.js" 
+            data-auto-init="true"
+            data-title="Smart Chat Demo"
+            data-position="bottom-right"
+            data-api-url="/api/chat/ask"
+            data-placeholder="Ask me anything about our services..."></script>
+</body>
+</html>

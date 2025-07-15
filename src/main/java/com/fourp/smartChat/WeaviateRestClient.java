@@ -95,5 +95,54 @@ public class WeaviateRestClient {
         }
     }
 
+    public List<String> querySimilarEstimates(double[] vector) {
+        try {
+            StringBuilder vectorArray = new StringBuilder();
+            for (double v : vector) {
+                if (vectorArray.length() > 0) vectorArray.append(",");
+                vectorArray.append(v);
+            }
+
+            String body = "{"
+                + "\"query\": \"{ Get { Estimate(nearVector: {vector: [" + vectorArray + "]}, limit: 3) { "
+                + "category item description cost_min cost_max unit timeframe factors } } }\""
+                + "}";
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(WEAVIATE_URL))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(body))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            JsonNode json = mapper.readTree(response.body());
+            JsonNode estimates = json.at("/data/Get/Estimate");
+
+            List<String> results = new ArrayList<>();
+            if (estimates.isArray()) {
+                for (JsonNode node : estimates) {
+                    String category = node.get("category").asText();
+                    String item = node.get("item").asText();
+                    String description = node.get("description").asText();
+                    int costMin = node.get("cost_min").asInt();
+                    int costMax = node.get("cost_max").asInt();
+                    String unit = node.get("unit").asText();
+                    String timeframe = node.get("timeframe").asText();
+
+                    String estimateInfo = String.format(
+                        "**%s**\n%s\n\n💰 **Cost Range:** $%,d - $%,d %s\n⏱️ **Timeframe:** %s",
+                        item, description, costMin, costMax, unit, timeframe
+                    );
+
+                    results.add(estimateInfo);
+                }
+            }
+
+            return results.isEmpty() ? List.of("No matching estimates found.") : results;
+        } catch (Exception e) {
+            throw new RuntimeException("Weaviate estimate query failed", e);
+        }
+    }
+
 
 }
