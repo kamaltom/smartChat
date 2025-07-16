@@ -40,6 +40,73 @@ public class ChatbotController {
         
         return truncated + "...";
     }
+    
+    private String detectSchedulingIntent(String question) {
+        String lowerQuestion = question.toLowerCase().trim();
+        
+        // Positive responses
+        String[] positiveKeywords = {
+            "yes", "yeah", "yep", "sure", "ok", "okay", "alright", "sounds good",
+            "let's do it", "please", "i would", "i'd like", "that works", "perfect",
+            "go ahead", "proceed", "schedule", "book", "set up", "arrange"
+        };
+        
+        // Negative responses
+        String[] negativeKeywords = {
+            "no", "nah", "nope", "not now", "not interested", "maybe later", "skip",
+            "don't want", "won't", "can't", "not really", "i'm good", "pass", "decline"
+        };
+        
+        // Check for positive intent
+        for (String keyword : positiveKeywords) {
+            if (lowerQuestion.contains(keyword)) {
+                return "positive";
+            }
+        }
+        
+        // Check for negative intent
+        for (String keyword : negativeKeywords) {
+            if (lowerQuestion.contains(keyword)) {
+                return "negative";
+            }
+        }
+        
+        // If unclear, return null to continue normal processing
+        return null;
+    }
+    
+    private boolean isGenericResponse(String response) {
+        String[] genericKeywords = {
+            "wiring", "electrical work", "outlets", "lighting", "panel", "switches",
+            "electrical issues", "electrical problems", "electrical repairs", "rewiring",
+            "installation", "upgrade", "fix", "repair", "replace", "install"
+        };
+        
+        String lower = response.toLowerCase();
+        int wordCount = lower.split("\\s+").length;
+        
+        // Consider it generic if it's short (≤6 words) and contains generic keywords
+        if (wordCount <= 6) {
+            for (String keyword : genericKeywords) {
+                if (lower.contains(keyword)) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+    
+    private String generateIntelligentFollowUp(String response) throws Exception {
+        String prompt = "The user said: '" + response + "'\n\n" +
+            "This is too generic for an electrical estimate. Generate 1-2 specific follow-up questions to understand:\n" +
+            "1. What type of electrical work exactly\n" +
+            "2. Location/scope of work (which rooms, whole house, etc.)\n\n" +
+            "Keep it conversational, helpful, and very concise (under 100 words). " +
+            "Format as a friendly response with bullet points for clarity.";
+        
+        return openAIClient.getChatCompletion(response, List.of(), List.of(), prompt);
+    }
 
     @PostMapping("/ask")
     public Map<String, Object> ask(@RequestBody Map<String, Object> request) throws Exception{
@@ -58,8 +125,6 @@ public class ChatbotController {
             return handleQuestionSelection(conversationId);
         } else if (question.equals("TECHNICIAN_BUTTON")) {
             return handleTechnicianSelection(conversationId);
-        } else if (question.equals("OTHER_BUTTON")) {
-            return handleOtherSelection(conversationId);
         }
         
         // Handle estimate flow
@@ -67,11 +132,17 @@ public class ChatbotController {
             return handleEstimateQuery(question, conversationId);
         }
         
+        // Handle final estimate details collection (no more follow-ups)
+        if ("collecting_estimate_details_final".equals(conversationState)) {
+            return handleFinalEstimateQuery(question, conversationId);
+        }
+        
         // Check for schedule confirmation
         if (conversationState != null && conversationState.contains("schedule_call")) {
-            if (question.toLowerCase().contains("yes")) {
+            String intent = detectSchedulingIntent(question);
+            if ("positive".equals(intent)) {
                 return handleScheduleCallConfirmation(conversationId);
-            } else if (question.toLowerCase().contains("no")) {
+            } else if ("negative".equals(intent)) {
                 return handleScheduleCallDeclined(conversationId);
             }
         }
@@ -110,10 +181,7 @@ public class ChatbotController {
         response.put("actionType", "estimate");
         
         String estimateResponse = "I'd be happy to help you get a free estimate!\n\n" +
-            "**💰 We provide estimates for:**\n" +
-            "• Panel upgrades • Outlets • Lighting\n" +
-            "• EV chargers • Rewiring • Generators\n\n" +
-            "**What type of electrical work do you need?**";
+            "We do most residential electrical work. What type of work do you need?";
             
         response.put("answer", limitResponseLength(estimateResponse));
         response.put("conversationState", "collecting_estimate_details");
@@ -124,6 +192,14 @@ public class ChatbotController {
         Map<String, Object> response = new HashMap<>();
         response.put("conversationId", conversationId);
         response.put("actionType", "estimate_query");
+        
+        // Check if response is too generic and needs clarification (limit to 1 follow-up)
+        if (isGenericResponse(question)) {
+            String followUpQuestions = generateIntelligentFollowUp(question);
+            response.put("answer", limitResponseLength(followUpQuestions));
+            response.put("conversationState", "collecting_estimate_details_final"); // One follow-up only
+            return response;
+        }
         
         // Query Weaviate for similar estimates
         double[] embedding = openAIClient.getEmbedding(question);
@@ -140,6 +216,33 @@ public class ChatbotController {
             estimateResponse = "I don't have specific pricing for that work.\n\n" +
                 "Our electricians can provide estimates for custom projects, specialized installations, and code upgrades.\n\n" +
                 "**Schedule a call for a personalized quote?**";
+        }
+        
+        response.put("answer", limitResponseLength(estimateResponse));
+        response.put("conversationState", "awaiting_schedule_call_confirmation");
+        return response;
+    }
+    
+    private Map<String, Object> handleFinalEstimateQuery(String question, String conversationId) throws Exception {
+        Map<String, Object> response = new HashMap<>();
+        response.put("conversationId", conversationId);
+        response.put("actionType", "final_estimate_query");
+        
+        // Query Weaviate for similar estimates (no more follow-ups)
+        double[] embedding = openAIClient.getEmbedding(question);
+        List<String> estimates = weaviateClient.querySimilarEstimates(embedding);
+        
+        String estimateResponse;
+        if (estimates.size() > 0 && !estimates.get(0).equals("No matching estimates found.")) {
+            estimateResponse = "Based on your details, here are estimated price ranges:\n\n";
+            // Show only the first estimate to keep it concise
+            estimateResponse += estimates.get(0) + "\n\n";
+            estimateResponse += "**⚠️ Prices vary based on your specific situation**\n\n" +
+                "**Schedule a call for a personalized quote?**";
+        } else {
+            estimateResponse = "I don't have specific pricing for that type of work.\n\n" +
+                "Our electricians can provide estimates for custom projects, specialized installations, and code upgrades.\n\n" +
+                "**Would you like to schedule a call or contact us at (404) 555-1212?**";
         }
         
         response.put("answer", limitResponseLength(estimateResponse));
@@ -230,24 +333,6 @@ public class ChatbotController {
             "**Call now: (404) 555-1212**";
             
         response.put("answer", technicianResponse);
-        return response;
-    }
-    
-    private Map<String, Object> handleOtherSelection(String conversationId) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("conversationId", conversationId);
-        response.put("actionType", "other");
-        
-        String otherResponse = "I'm here to help with anything else you need!\n\n" +
-            "You can ask me about:\n" +
-            "• Payment options and financing\n" +
-            "• Warranties and guarantees\n" +
-            "• Service areas and travel fees\n" +
-            "• Company history and credentials\n" +
-            "• Permits and inspections\n\n" +
-            "What can I help you with today?";
-            
-        response.put("answer", otherResponse);
         return response;
     }
     

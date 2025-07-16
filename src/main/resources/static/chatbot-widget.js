@@ -297,10 +297,6 @@
                     color: white;
                 }
 
-                .other-btn:hover {
-                    background: #6c757d;
-                    color: white;
-                }
 
                 @media (max-width: 480px) {
                     .chatbot-panel {
@@ -446,8 +442,7 @@
                         <button class="main-menu-btn estimate-btn" onclick="window.chatbotWidget.selectOption('ESTIMATE_BUTTON')">💰 Need Estimate</button>
                         <button class="main-menu-btn schedule-btn" onclick="window.chatbotWidget.selectOption('SCHEDULE_BUTTON')">📅 Schedule</button>
                         <button class="main-menu-btn question-btn" onclick="window.chatbotWidget.selectOption('QUESTION_BUTTON')">❓ Question</button>
-                        <button class="main-menu-btn technician-btn" onclick="window.chatbotWidget.selectOption('TECHNICIAN_BUTTON')">👨‍🔧 Chat with Technician</button>
-                        <button class="main-menu-btn other-btn" onclick="window.chatbotWidget.selectOption('OTHER_BUTTON')">📋 Others</button>
+                        <button class="main-menu-btn technician-btn" onclick="window.chatbotWidget.selectOption('TECHNICIAN_BUTTON')" style="grid-column: 1 / -1;">👨‍🔧 Chat with Technician</button>
                     </div>
                 </div>
             `;
